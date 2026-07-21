@@ -22,14 +22,23 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    if form_data.username != "admin" or form_data.password != "admin":
+    users = {
+        "admin": {"password": "admin", "role": "admin"},
+        "doctor": {"password": "doctor", "role": "doctor"},
+        "receptionist": {"password": "receptionist", "role": "receptionist"}
+    }
+    
+    user = users.get(form_data.username)
+    if not user or user["password"] != form_data.password:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": form_data.username}, expires_delta=access_token_expires
+        data={"sub": form_data.username, "role": user["role"]}, 
+        expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "role": user["role"]}

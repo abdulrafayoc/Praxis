@@ -5,22 +5,24 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 
-const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/calls', icon: PhoneCall, label: 'Call Logs' },
-  { to: '/appointments', icon: Calendar, label: 'Appointments' },
-  { to: '/doctors', icon: Stethoscope, label: 'Doctors' },
-  { to: '/knowledge-base', icon: BookOpen, label: 'Knowledge Base' },
-  { to: '/patients', icon: Users, label: 'Patients' },
-  { to: '/notifications', icon: Bell, label: 'Notifications' },
-  { to: '/prompts', icon: Code, label: 'Prompts' },
+const allNavItems = [
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['admin', 'doctor', 'receptionist'] },
+  { to: '/calls', icon: PhoneCall, label: 'Call Logs', roles: ['admin', 'doctor', 'receptionist'] },
+  { to: '/appointments', icon: Calendar, label: 'Appointments', roles: ['admin', 'doctor', 'receptionist'] },
+  { to: '/doctors', icon: Stethoscope, label: 'Doctors', roles: ['admin', 'receptionist'] },
+  { to: '/knowledge-base', icon: BookOpen, label: 'Knowledge Base', roles: ['admin', 'receptionist'] },
+  { to: '/patients', icon: Users, label: 'Patients', roles: ['admin', 'doctor', 'receptionist'] },
+  { to: '/notifications', icon: Bell, label: 'Notifications', roles: ['admin', 'receptionist'] },
+  { to: '/prompts', icon: Code, label: 'Prompts', roles: ['admin'] },
 ];
 
 export default function Sidebar() {
-  const { logout } = useAuth();
+  const { logout, role } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  const navItems = allNavItems.filter(item => item.roles.includes(role || 'admin'));
 
   return (
     <aside style={{
@@ -91,10 +93,15 @@ export default function Sidebar() {
             background: 'linear-gradient(135deg, #7C3AED, #06B6D4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'white', fontSize: '0.75rem', fontWeight: 700,
-          }}>A</div>
+            textTransform: 'uppercase'
+          }}>{(role || 'a')[0]}</div>
           <div>
-            <p style={{ color: '#F1F5F9', fontSize: '0.875rem', fontWeight: 500, margin: 0 }}>Admin</p>
-            <p style={{ color: '#94A3B8', fontSize: '0.75rem', margin: 0 }}>Administrator</p>
+            <p style={{ color: '#F1F5F9', fontSize: '0.875rem', fontWeight: 500, margin: 0, textTransform: 'capitalize' }}>
+              {role === 'admin' ? 'Administrator' : role || 'User'}
+            </p>
+            <p style={{ color: '#94A3B8', fontSize: '0.75rem', margin: 0, textTransform: 'capitalize' }}>
+              {role || 'Role'}
+            </p>
           </div>
         </div>
         <button

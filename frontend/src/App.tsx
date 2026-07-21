@@ -11,9 +11,19 @@ import Patients from './pages/Patients';
 import Notifications from './pages/Notifications';
 import Prompts from './pages/Prompts';
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
+  const { isAuthenticated, role } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    // If not authorized for this route, fallback to dashboard
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 export default function App() {
@@ -29,14 +39,14 @@ export default function App() {
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="calls" element={<Calls />} />
-        <Route path="appointments" element={<Appointments />} />
-        <Route path="doctors" element={<Doctors />} />
-        <Route path="knowledge-base" element={<KnowledgeBase />} />
-        <Route path="patients" element={<Patients />} />
-        <Route path="notifications" element={<Notifications />} />
-        <Route path="prompts" element={<Prompts />} />
+        <Route path="dashboard" element={<ProtectedRoute allowedRoles={['admin', 'doctor', 'receptionist']}><Dashboard /></ProtectedRoute>} />
+        <Route path="calls" element={<ProtectedRoute allowedRoles={['admin', 'doctor', 'receptionist']}><Calls /></ProtectedRoute>} />
+        <Route path="appointments" element={<ProtectedRoute allowedRoles={['admin', 'doctor', 'receptionist']}><Appointments /></ProtectedRoute>} />
+        <Route path="doctors" element={<ProtectedRoute allowedRoles={['admin', 'receptionist']}><Doctors /></ProtectedRoute>} />
+        <Route path="knowledge-base" element={<ProtectedRoute allowedRoles={['admin', 'receptionist']}><KnowledgeBase /></ProtectedRoute>} />
+        <Route path="patients" element={<ProtectedRoute allowedRoles={['admin', 'doctor', 'receptionist']}><Patients /></ProtectedRoute>} />
+        <Route path="notifications" element={<ProtectedRoute allowedRoles={['admin', 'receptionist']}><Notifications /></ProtectedRoute>} />
+        <Route path="prompts" element={<ProtectedRoute allowedRoles={['admin']}><Prompts /></ProtectedRoute>} />
       </Route>
     </Routes>
   );

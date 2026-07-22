@@ -10,6 +10,7 @@ import KnowledgeBase from './pages/KnowledgeBase';
 import Patients from './pages/Patients';
 import Notifications from './pages/Notifications';
 import Prompts from './pages/Prompts';
+import Landing from './pages/Landing';
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
   const { isAuthenticated, role } = useAuth();
@@ -29,16 +30,16 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode,
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/landing" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route
-        path="/"
         element={
           <ProtectedRoute>
             <Layout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<ProtectedRoute allowedRoles={['admin', 'doctor', 'receptionist']}><Dashboard /></ProtectedRoute>} />
         <Route path="calls" element={<ProtectedRoute allowedRoles={['admin', 'doctor', 'receptionist']}><Calls /></ProtectedRoute>} />
         <Route path="appointments" element={<ProtectedRoute allowedRoles={['admin', 'doctor', 'receptionist']}><Appointments /></ProtectedRoute>} />
